@@ -9,6 +9,7 @@ class GeneticAlgorithm:
         self.tournamentSize = 5
         self.elitism = True
 
+
     def evolvePopulation(self, inPopulation):
         population = Population(self.tourManager, inPopulation.populationSize(), False)
         elitismOffset = 0
@@ -27,17 +28,44 @@ class GeneticAlgorithm:
 
         return population
 
+
     def crossover(self, parenti, parentii):
         child = Tour(self.tourManager)
         startPos = int(random.random() * parenti.tourSize())
         endPos = int(random.random() * parentii.tourSize())
-        # STOP HERE, TO-DO:
-        # FINISH CROSSOVER, MUTATION AND TOURNAMENT SELECTION
+
+        for i in range(child.tourSize()):
+            if startPos < endPos and startPos < i < endPos:
+                child.setCity(i, parenti.getCity(i))
+            elif startPos > endPos:
+                if not startPos < i < endPos:
+                    child.setCity(i, parenti.getCity(i))
+
+        for i in range(parentii.tourSize()):
+            if not child.containsCity(parentii.getCity(i)):
+                for j in range(child.tourSize()):
+                    if child.getCity(j) is None:
+                        child.setCity(j, parentii.getCity(i))
+                        break
+
+        return child
+
 
     def tournamentSelection(self, pop):
-        pass
-        # WRITE HERE
+        tournament = Population(self.tourManager, self.tournamentSize, False)
+        for i in range(self.tournamentSize):
+            rand = int(random.random() * self.tournamentSize)
+            tournament.saveTour(i, pop.getTour(rand))
+
+        tourFittest = tournament.getFittest()
+        return tourFittest
+
 
     def mutate(self, tour):
-        pass
-        # WRITE CODE
+        for i in range(tour.tourSize()):
+            if random.random() < self.mutationRate:
+                j = int(random.random()*tour.tourSize())
+                cityI = tour.getCity(i)
+                cityII = tour.getCity(j)
+                tour.setCity(i, cityII)
+                tour.setCity(j, cityI)
